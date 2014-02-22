@@ -35,7 +35,7 @@ _root_ = File.expand_path('../../',  __FILE__)
 # Loading of concerns
 require "#{_root_}/app/controllers/concerns/controller.rb"
 
-%w[ base role user ].each do |concern|
+%w[ base role user user_role ].each do |concern|
   require "#{_root_}/app/models/concerns/#{concern}.rb"
 end
 

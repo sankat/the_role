@@ -85,34 +85,25 @@ install note
 ```
 bundle exec rails g the_role --help
 ```
-
-### Change User migration
-
-Add **role_id:integer** field to your User Model
-
-```ruby
-def self.up
-  create_table :users do |t|
-    t.string :login
-    t.string :email
-    t.string :crypted_password
-    t.string :salt
-
-    # TheRole field
-    t.integer :role_id
-
-    t.timestamps
-  end
-end
-```
-
 ### Change User model
+
+add one line in user model is depend upon the association
+if user has one role then add
+```ruby
+include TheRole::User::HasOneRole
+```
+and if user has many roles then add
+```ruby
+include TheRole::User::HasManyRoles
+```
 
 ```ruby
 class User < ActiveRecord::Base
-  include TheRole::User
-  # or following alias for AR:
-  # has_role
+ # has_one role
+ include TheRole::User::HasManyRoles
+ # or following alias for AR:
+ # has_many roles
+ # include TheRole::User::HasManyRoles
 
   # has_many :pages
 end
@@ -135,7 +126,6 @@ class Role < ActiveRecord::Base
   # acts_as_role
 end
 ```
-
 install TheRole migrations
 
 ```ruby
@@ -146,6 +136,105 @@ Invoke migration
 
 ```ruby
 rake db:migrate
+```
+### Create role dynamic
+install dynamic declaration of roles
+its more helpfull in many to many association
+```ruby
+ bundle exec rails g the_role many-to-many
+```
+or create manually
+* this is help to create roles group like read, write, other
+
+```ruby
+# config/permissions.yml
+users:
+  read:
+    index: true
+    show: true
+  write:
+    new: true
+    create: true
+    edit: true
+    update: true
+    destory: true
+  print:
+    print: true
+
+roles:
+  read:
+    index: true
+    show: true
+  write:
+    new: true
+    create: true
+    edit: true
+    update: true
+    destory: true
+
+messages:
+  read:
+    index: true
+    show: true
+  write:
+    new: true
+    create: true
+    edit: true
+    update: true
+    destory: true
+  print:
+    print: true
+```
+
+```ruby
+# config/initializers/permission.rb
+
+class Permission
+  class << self
+    def get_permissions
+      @@permissions ||= YAML.load_file('config/permissions.yml')
+    end
+    def permission(controller, action)
+      get_permissions[controller.to_s][action.to_s] rescue nil
+    end
+  end
+end
+```
+* this method read the permissiion from yml file and initialized al load time
+
+add one class method in the Role class, which create a appropriate rules according to the group
+
+file:- app/models/role
+
+```ruby
+
+    # This method create one permoission json oject for the role
+    # input json format is 
+    #   {"users"=>{"read"=>"1", "write"=>"1", "other"=>"1"}, "roles"=>{"read"=>"0", "write"=>"0"}}
+    # then outupt will be 
+    #  "{\"users\":{\"index\":true,\"show\":true,\"new\":true,\"create\":true,\"edit\":true,\"update\":true,\"destory\":true,\"print\":true}}"
+    # parameter => role object
+    # method => class method
+    def self.set_the_role json
+        hash = {}
+        json.each do |key, value|
+          value.each do |k, v|
+            # binding.pry
+            hash.deep_merge!(key => Permission.permission(key, k)) if v == '1'
+          end
+        end
+        hash.to_json
+      end
+```
+
+If your are using the rails 4 then calculate the the role has before the params permit action
+```ruby
+# app/controllers/roles_controllers.rb
+    def roles_params
+        params[:role][:the_role] = Role.set_the_role params[:role][:the_role]
+        params.require(:role).permit!#(:name, :title, :description, :the_role)
+    end
+
 ```
 
 ### Create Admin

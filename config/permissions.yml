@@ -1,0 +1,42 @@
+# set the your permission hash
+# <controller_name>:
+#	<group_name>:
+#		<action_name>: true
+
+
+# users:
+#   read:
+#     index: true
+#     show: true
+#   write:
+#     new: true
+#     create: true
+#     edit: true
+#     update: true
+#     destory: true
+#   print:
+#     print: true
+
+# roles:
+#   read:
+#     index: true
+#     show: true
+#   write:
+#     new: true
+#     create: true
+#     edit: true
+#     update: true
+#     destory: true
+
+# messages:
+#   read:
+#     index: true
+#     show: true
+#   write:
+#     new: true
+#     create: true
+#     edit: true
+#     update: true
+#     destory: true
+#   print:
+#     print: true

@@ -16,7 +16,8 @@ module TheRole
     end
 
     included do
-      has_many  :users, dependent: TheRole.config.destroy_strategy
+      has_many :user_roles
+      has_many  :users, dependent: TheRole.config.destroy_strategy, through: :user_roles
       validates :name,  presence: true, uniqueness: true
       validates :title, presence: true, uniqueness: true
       validates :description, presence: true

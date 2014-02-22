@@ -12,6 +12,8 @@ class TheRoleGenerator < Rails::Generators::NamedBase
       cp_models
     elsif gen_name == 'admin'
       create_admin_role
+    elsif gen_name == 'many-to-many'
+      cp_permissions
     else
       puts 'TheRole Generator - wrong Name'
       puts 'Try to use install'
@@ -27,12 +29,17 @@ class TheRoleGenerator < Rails::Generators::NamedBase
   end
 
   def cp_models
-    copy_file "#{root_path}/app/models/_templates_/role.rb",
-              "app/models/role.rb"
+    copy_file "#{root_path}/app/models/_templates_/role.rb", "app/models/role.rb"
+    copy_file "#{root_path}/app/models/_templates_/user_role.rb", "app/models/user_role.rb"
   end
 
   def cp_config
     copy_file 'the_role.rb', 'config/initializers/the_role.rb'
+  end
+
+  def cp_permissions
+    copy_file "#{root_path}/config/permissions.yml", "config/permissions.yml"
+    copy_file "#{root_path}/config/permission.rb", "config/initializers/permission.rb"
   end
 
   def create_admin_role
